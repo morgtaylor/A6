@@ -92,30 +92,19 @@ public class MazeGenerator {
                 validNeighbors.push(new int[]{nx, ny});
             }
         }
-
         // Convert Stack to array
         return validNeighbors.toArray(new int[validNeighbors.size()][]);
     }
 
-    // Method to print the maze
-    public void printMaze() {
+    // Method to send maze as string to GUI
+    public String printMaze() {
+        StringBuilder mazeString = new StringBuilder();
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                System.out.print(maze[i][j] + " ");
+                mazeString.append(maze[i][j]).append(" ");
             }
-            System.out.println();
+            mazeString.append("\n"); // New line after each row
         }
-    }
-
-    // Main method to test the maze generator
-    public static void main(String[] args) {
-        int rows = 11; // Number of rows in the maze
-        int cols = 21; // Number of columns in the maze
-
-        // Create maze generator
-        MazeGenerator mazeGenerator = new MazeGenerator(rows, cols);
-
-        // Print the generated maze
-        mazeGenerator.printMaze();
+        return mazeString.toString();
     }
 }
