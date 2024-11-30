@@ -10,7 +10,7 @@ public class MazeGenerator {
     // Maze characters
     private static final char WALL = '#';
     private static final char OPEN = '.';
-
+    private static final char EXIT = 'E';
     // Maze dimensions
     private int rows;
     private int cols;
@@ -39,7 +39,7 @@ public class MazeGenerator {
         generateMaze(1, 1);  // Start DFS from (1,1) inside the maze
 
         // Ensure a path between start and destination
-        maze[rows - 2][cols - 1] = OPEN;
+        maze[rows - 2][cols - 1] = EXIT;
     }
 
     // DFS-based maze generation with backtracking
@@ -106,5 +106,8 @@ public class MazeGenerator {
             mazeString.append("\n"); // New line after each row
         }
         return mazeString.toString();
+    }
+    public char[][] getMaze() {
+        return maze; // Getter method for GUI access
     }
 }
