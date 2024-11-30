@@ -3,13 +3,15 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 
 public class MazeGUI {
     private static int playerRow = 1, playerCol = 0; // Starting position of the player
     private static final int rows = 11, cols = 11; // Maze dimensions
     private static char[][] mazeData; // Stores the maze structure
     private static JTextArea mazeView; // Displays the 3x3 view of the maze
-    private static char[][] optimalPath; // Stores the optimal path for hints
+    private static List<int[]> optimalPath; // Stores the optimal path for hints
 
 
     // Main method to launch the Maze GUI
@@ -19,12 +21,9 @@ public class MazeGUI {
         mazeData = mazeGenerator.getMaze();
 
         // Initialize optimal path array
-        optimalPath = new char[rows][cols];
-        for (int i = 0; i < rows; i++) {
-            Arrays.fill(optimalPath[i], ' ');
-        }
+        optimalPath = new ArrayList<>();
 
-        findPath(rows - 2, cols - 1, new boolean[rows][cols]); // Find the optimal path and mark it in optimalPath array
+        findPath(playerRow, playerCol, new boolean[rows][cols]); // Find the optimal path and mark it in optimalPath array
 
         JFrame frame = initializeFrame(); // Set up main frame
         addInstructionPanel(frame); // Add instructions on the left
@@ -139,44 +138,70 @@ public class MazeGUI {
         return view.toString();
     }
 
-    private static boolean findPath(int row, int col, boolean[][] visited) {
-        // Check if the current position is out of bounds or already visited
-        if (row < 0 || row >= rows || col < 0 || col >= cols || mazeData[row][col] == '#' || visited[row][col]) {
-            return false; // No valid path
-        }
-
+    private static boolean findPath(int row, int col, boolean[][] visited) { 
+         // Check if the current position is out of bounds or already visited
+        if (row < 0 || row >= rows || col < 0 || col >= cols || mazeData[row][col] == '#' || visited[row][col]) { 
+            return false;  // No valid path
+        } 
         visited[row][col] = true; // Mark current cell as visited
-
-        // Check if we have reached the destination (exit)
-        if (row == rows - 2 && col == cols - 1) { // Assuming the exit is at (rows-2, cols-1)
-            optimalPath[row][col] = '+'; // Mark destination as part of the path
+         // Check if we have reached the destination (exit)
+        if (row == rows - 2 && col == cols - 1) { // Exit is at (rows-2, cols-1)
+            optimalPath.add(new int[]{row, col}); // Mark destination as part of the path
             return true;
-        }
-
+        } 
         // Explore neighbors in all four directions (up, down, left, right)
-        int[][] directions = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } }; // up, down, left, right
-        for (int[] dir : directions) {
-            int newRow = row + dir[0];
-            int newCol = col + dir[1];
-
+        int[][] directions = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } }; 
+        for (int[] dir : directions) { 
+            int newRow = row + dir[0]; 
+            int newCol = col + dir[1]; 
             // Continue exploring if the new position is valid and hasn't been visited
-            if (findPath(newRow, newCol, visited)) {
-                optimalPath[row][col] = '+'; // Mark this cell as part of the optimal path
+            if (findPath(newRow, newCol, visited)) { 
+                optimalPath.add(new int[]{row, col}); // Mark this cell as part of the optimal path
                 return true; // Stop further recursion once the path is found
+            } 
+        } 
+        return false; // No path found from this cell
+    }
+
+    // Function to check if a cell is part of the optimal path from the player's position onward 
+    private static boolean isPartOfOptimalPath(int row, int col, int playerIndex) {
+        for (int i = 0; i < playerIndex; i++) { // Iterate only up to the current playerIndex
+            int[] position = optimalPath.get(i);
+            if (position[0] == row && position[1] == col) {
+                System.out.println("Found cell at index " + i + ": " + Arrays.toString(position));
+                return true;
             }
         }
+        return false;
+    }
 
-        return false; // No path found from this cell
+    // Function to find the player's index in the optimal path 
+    private static int findPlayerIndexInOptimalPath() { 
+        for (int i = 0; i < optimalPath.size(); i++) { 
+            int[] position = optimalPath.get(i); 
+            if (position[0] == playerRow && position[1] == playerCol) { 
+                System.out.println("Player found at: " + Arrays.toString(position));
+                return i; 
+            } 
+        } 
+        return -1;
     }
 
     // Generate a 3x3 view of the maze around the player, displaying hints
     private static String get3x3ViewWithHints() {
         // Check if recalculating optimal path is necessary
-        if (optimalPath[playerRow][playerCol] != '+') {
-            for (int i = 0; i < rows; i++) {
-                Arrays.fill(optimalPath[i], ' '); // Clear previous path
-            }
+        int playerIndex = findPlayerIndexInOptimalPath();
+        System.out.println("Player Index: " + playerIndex);
+
+        if (playerIndex == -1) {
+            System.out.println("Recalculating optimal path...");
+            optimalPath = new ArrayList<>();
             findPath(playerRow, playerCol, new boolean[rows][cols]); // Recalculate optimal path from player's position
+            playerIndex = findPlayerIndexInOptimalPath(); // Retry finding player index
+            if (playerIndex == -1) {
+                System.out.println("Failed to recalculate optimal path.");
+                return "Error: Unable to calculate optimal path.";
+            }
         }
 
         StringBuilder view = new StringBuilder();
@@ -186,7 +211,7 @@ public class MazeGUI {
                     view.append('@'); // Player's current position
                 } else if (i < 0 || j < 0 || i >= rows || j >= cols) {
                     view.append(' '); // Out of bounds
-                } else if (optimalPath[i][j] == '+') {
+                } else if (isPartOfOptimalPath(i, j, playerIndex)) {
                     view.append('+'); // Show part of the optimal path
                 } else {
                     view.append(mazeData[i][j]); // Display maze cell
