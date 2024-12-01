@@ -2,6 +2,7 @@ import java.util.Random;
 import java.util.Stack;
 
 public class MazeGenerator {
+    private static int mazeCounter = 0; // Counter to track maze generations
     // Define directions (east, west, north, south)
     private static final int[] DX = {1, -1, 0, 0}; // East, West, North, South for X-axis
     private static final int[] DY = {0, 0, -1, 1}; // East, West, North, South for Y-axis
@@ -10,7 +11,6 @@ public class MazeGenerator {
     private static final char WALL = '#';
     private static final char OPEN = '.';
     private static final char EXIT = 'E';
-
     // Maze dimensions
     private int rows;
     private int cols;
@@ -19,6 +19,8 @@ public class MazeGenerator {
 
     // Constructor to initialize maze dimensions
     public MazeGenerator(int rows, int cols) {
+        mazeCounter++;
+        //System.out.println(mazeCounter);
         this.rows = rows;
         this.cols = cols;
         maze = new char[rows][cols];
