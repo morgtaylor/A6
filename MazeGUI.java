@@ -2,7 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -191,15 +190,12 @@ public class MazeGUI {
     private static String get3x3ViewWithHints() {
         // Check if recalculating optimal path is necessary
         int playerIndex = findPlayerIndexInOptimalPath();
-        //System.out.println("Player Index: " + playerIndex);
 
         if (playerIndex == -1) {
-            //System.out.println("Recalculating optimal path...");
             optimalPath = new ArrayList<>();
             findPath(playerRow, playerCol, new boolean[rows][cols]); // Recalculate optimal path from player's position
             playerIndex = findPlayerIndexInOptimalPath(); // Retry finding player index
             if (playerIndex == -1) {
-                //System.out.println("Failed to recalculate optimal path.");
                 return "Error: Unable to calculate optimal path.";
             }
         }
