@@ -12,6 +12,7 @@ public class MazeGUI {
     private static char[][] mazeData; // Stores the maze structure
     private static JTextArea mazeView; // Displays the 3x3 view of the maze
     private static List<int[]> optimalPath; // Stores the optimal path for hints
+    private static JPanel mainPanel = new JPanel(new BorderLayout());
 
 
     // Main method to launch the Maze GUI
@@ -59,40 +60,35 @@ public class MazeGUI {
 
     // Set up and add the main maze panel, initially showing a start message
     private static void addMazePanel(JFrame frame) {
-        JPanel mazePanel = new JPanel(new BorderLayout());
-
         JTextArea messageArea = new JTextArea("Press ENTER to start the maze :)");
         messageArea.setEditable(false);
         messageArea.setFont(new Font("Monospaced", Font.PLAIN, 20));
         messageArea.setBorder(BorderFactory.createEmptyBorder(75, 30, 10, 10));
-
-        mazePanel.add(messageArea, BorderLayout.CENTER);
-        frame.add(mazePanel, BorderLayout.CENTER);
+        mainPanel.add(messageArea, BorderLayout.CENTER);
 
         mazeView = new JTextArea();
         mazeView.setFont(new Font("Monospaced", Font.PLAIN, 40));
         mazeView.setEditable(false);
+        mazeView.setBorder(BorderFactory.createEmptyBorder(125, 175, 10, 10));
 
-        JPanel mazeViewPanel = new JPanel(new GridBagLayout());
-        mazeView.setBackground(mazeViewPanel.getBackground());
-        mazeViewPanel.add(mazeView);
-        mazePanel.add(mazeViewPanel, BorderLayout.CENTER);
-
-        mazeView.setText(get3x3View()); // Set initial view
-
-        addKeyListeners(frame, mazePanel, messageArea, mazeViewPanel);
+        frame.add(mainPanel, BorderLayout.CENTER);
+        addKeyListeners(frame, mainPanel, messageArea );
     }
 
     // Add key listeners for player movement and hint functionality
-    private static void addKeyListeners(JFrame frame, JPanel mazePanel, JTextArea messageArea, JPanel mazeViewPanel) {
+    private static void addKeyListeners(JFrame frame, JPanel mazePanel, JTextArea messageArea) {
         frame.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    mazePanel.remove(messageArea);
-                    mazePanel.add(mazeViewPanel, BorderLayout.CENTER);
-                    mazePanel.revalidate();
-                    mazePanel.repaint();
+                    // Remove message and add maze view
+                    mainPanel.remove(messageArea);
+                    mainPanel.add(mazeView, BorderLayout.CENTER);
+                    // Set initial maze view
+                    mazeView.setText(get3x3View());
+                    // Refresh the panel to display changes
+                    mainPanel.revalidate();
+                    mainPanel.repaint();
                 } else if (e.getKeyCode() == KeyEvent.VK_H) {
                     mazeView.setText(get3x3ViewWithHints()); // Show hint
                 } else {
@@ -174,6 +170,7 @@ public class MazeGUI {
         }
         return false;
     }
+
 
     // Function to find the player's index in the optimal path 
     private static int findPlayerIndexInOptimalPath() { 
